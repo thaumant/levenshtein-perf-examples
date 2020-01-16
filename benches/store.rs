@@ -1,5 +1,4 @@
 use std::ptr;
-use std::cmp::max;
 use criterion::{criterion_group, criterion_main, Criterion};
 
 fn store_simple<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) {
@@ -11,38 +10,41 @@ fn store_simple<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Ite
 
 fn store_unsafe<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) {
     buffer.clear();
-    let mut capacity = buffer.capacity();
     let mut i = 0;
+    let mut cap = buffer.capacity();
     for item in iter {
-        if i >= capacity {
-            buffer.reserve(max(capacity * 2, 1));
-            capacity = buffer.capacity();
+        if i >= cap {
+            buffer.reserve(1);
+            cap = buffer.capacity();
         }
-        unsafe { *buffer.get_unchecked_mut(i) = item; }
+        unsafe {
+            *buffer.get_unchecked_mut(i) = item;
+        }
         i += 1;
     }
-    unsafe { buffer.set_len(i); }
+    unsafe {
+        buffer.set_len(i);
+    }
 }
 
 fn store_raw<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) {
     buffer.clear();
-    let mut i   = 0;
-    let mut p   = buffer.as_mut_ptr();
-    let mut cap = buffer.capacity() as isize;
-
+    let mut i = 0;
+    let mut p = buffer.as_mut_ptr();
+    let mut cap = buffer.capacity();
     for item in iter {
         if i >= cap {
-            buffer.reserve(max(cap * 2, 1) as usize);
-            cap = buffer.capacity() as isize;
+            buffer.reserve(1);
             p = buffer.as_mut_ptr();
+            cap = buffer.capacity();
         }
         unsafe {
-            ptr::write(p.offset(i), item);
-            i += 1;
+            ptr::write(p.add(i), item);
         }
+        i += 1;
     }
     unsafe {
-        buffer.set_len(i as usize);
+        buffer.set_len(i);
     }
 }
 

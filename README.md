@@ -12,5 +12,5 @@ cargo bench iter
 
 Copying chars into a vector:
 ```
-cargo bench iter
+cargo bench store
 ```

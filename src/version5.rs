@@ -1,4 +1,3 @@
-use std::cmp::max;
 use std::cell::RefCell;
 
 static DEFAULT_CAPACITY: usize = 20;
@@ -50,12 +49,12 @@ impl Levenshtein {
 
 fn store<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) {
     buffer.clear();
-    let mut capacity = buffer.capacity();
+    let mut cap = buffer.capacity();
     let mut i = 0;
     for item in iter {
-        if i >= capacity {
-            buffer.reserve(max(capacity * 2, 1));
-            capacity = buffer.capacity();
+        if i >= cap {
+            buffer.reserve(1);
+            cap = buffer.capacity();
         }
         unsafe { *buffer.get_unchecked_mut(i) = item; }
         i += 1;
