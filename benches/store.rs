@@ -48,6 +48,11 @@ fn store_raw<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) 
     }
 }
 
+fn store_extend<T: Clone, Iter: Iterator<Item=T>>(buffer: &mut Vec<T>, iter: Iter) {
+    buffer.clear();
+    buffer.extend(iter);
+}
+
 
 pub fn store_bench(cr: &mut Criterion) {
     let string = "abcdefghijklmnopqrstuvwxyz";
@@ -70,6 +75,13 @@ pub fn store_bench(cr: &mut Criterion) {
         let mut buffer = Vec::with_capacity(string.chars().count());
         b.iter(|| {
             store_raw(&mut buffer, string.chars());
+        })
+    });
+
+    cr.bench_function("store_extend", |b| {
+        let mut buffer = Vec::with_capacity(string.chars().count());
+        b.iter(|| {
+            store_extend(&mut buffer, string.chars());
         })
     });
 }
